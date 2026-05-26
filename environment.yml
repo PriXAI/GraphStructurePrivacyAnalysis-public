@@ -1,0 +1,16 @@
+name: graph-structure-privacy-analysis
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy=1.26.4
+  - pandas=2.2.2
+  - scikit-learn=1.2.2
+  - scipy=1.12.0
+  - networkx=3.3
+  - matplotlib=3.8.4
+  - seaborn=0.13.2y
+  - pip
+  - pip:
+      - torch==2.3.0
+      - torch-geometric==2.5.3

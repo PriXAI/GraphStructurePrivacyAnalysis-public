@@ -1,0 +1,10 @@
+myenv/
+__pycache__
+results/
+plots/
+checkpoints/
+*.csv
+*.pdf
+*.png
+.DS_Store
+data/old/
