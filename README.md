@@ -1,7 +1,7 @@
 # Impact of Graph Structure on Membership-Inference Risk for Graph Neural Networks
 
 This repository contains code accompaying the paper titled "Impact of Graph Structure on Membership-Inference Risk for
-Graph Neural Networks" published in PETS 2026. 
+Graph Neural Networks" to be published in PETS 2026. 
 
 We study how graph structure influences node-level membership privacy in GNNs, focusing on two factors: (i) how the training graph is constructed and (ii) what edge information is available at inference time. The pipeline trains graph neural networks on train-test graph splits, evaluates the same target model under different graph-access settings, and runs the membership inference attack described in the paper.
 
@@ -30,7 +30,7 @@ data/cora/snowball_3_0.1/split_1.pt
 data/cora/random_0.5/split_1.pt
 ```
 
-Note that the Chameleon base graph is postprocessed to remove self-loops and make the graph undirected. The processed graph is stored at `data/chameleon`, and the corresponding split files are stored under `data/chameleon1/`.
+Note that the Chameleon base graph is pre-processed to remove self-loops and make the graph undirected. The processed graph is stored at `data/chameleon` and is used to construct train-test splits. The corresponding split files are stored under `data/chameleon1/`.
 
 Snowball split directories include the max-neighbor setting in the folder name:
 
