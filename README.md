@@ -7,16 +7,15 @@ Requested Badge(s):
 
 
 ## Description 
-This artifact accompanies the PETS 2026 paper \emph{Impact of Graph Structure
-on Membership-Inference Risk for Graph Neural Networks} by Megha Khosla. It
+This artifact accompanies the PETS 2026 paper *Impact of Graph Structure on Membership-Inference Risk for Graph Neural Networks* by Megha Khosla. It
 contains the code and data needed to reproduce the paper's graph neural network
 membership-inference experiments.
 
 The artifact studies how graph structure affects node-level membership privacy
 in GNNs. In particular, it evaluates two structural factors: how the training
 graph is constructed and what edge information is available at inference time.
-For training-graph construction, the artifact compares \emph{snowball sampling},
-a structure-aware procedure, with \emph{uniform random node sampling}. For
+For training-graph construction, the artifact compares *snowball sampling*,
+a structure-aware procedure, with *uniform random node sampling*. For
 inference-time edge access, it evaluates the same target model under the
 original sampled graph, the full graph, and a no-edge setting.
 
@@ -45,10 +44,6 @@ risk in this public-data experimental setting.
 
 ## Basic Requirements 
 
-For both sections below, if you are giving reviewers remote access to special
-hardware (e.g., Intel SGX v2.0) or proprietary software (e.g., Matlab R2025a)
-for the purpose of the artifact evaluation, do not provide these instructions
-here but rather in the corresponding submission field on HotCRP.
 
 ### Hardware Requirements 
 
