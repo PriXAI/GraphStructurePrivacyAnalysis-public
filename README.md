@@ -1,17 +1,78 @@
-# Impact of Graph Structure on Membership-Inference Risk for Graph Neural Networks
 
-This repository contains code accompaying the paper titled "Impact of Graph Structure on Membership-Inference Risk for
-Graph Neural Networks" to be published in PETS 2026. 
+Paper title: **Impact of Graph Structure on Membership-Inference Risk for Graph Neural Networks**
 
-We study how graph structure influences node-level membership privacy in GNNs, focusing on two factors: (i) how the training graph is constructed and (ii) what edge information is available at inference time. The pipeline trains graph neural networks on train-test graph splits, evaluates the same target model under different graph-access settings, and runs the membership inference attack described in the paper.
+Requested Badge(s):
+  - [X] **Available**
 
-The two sampling strategies considered in the work are (i) snowball sampling and (ii) random sampling
 
-The main graph-access settings are:
 
-- **Original split**: evaluate with the sampled split graph.
-- **Full graph**: evaluate with all available graph edges.
-- **No edges**: evaluate with node features only.
+## Description 
+This artifact accompanies the PETS 2026 paper \emph{Impact of Graph Structure
+on Membership-Inference Risk for Graph Neural Networks} by Megha Khosla. It
+contains the code and data needed to reproduce the paper's graph neural network
+membership-inference experiments.
+
+The artifact studies how graph structure affects node-level membership privacy
+in GNNs. In particular, it evaluates two structural factors: how the training
+graph is constructed and what edge information is available at inference time.
+For training-graph construction, the artifact compares \emph{snowball sampling},
+a structure-aware procedure, with \emph{uniform random node sampling}. For
+inference-time edge access, it evaluates the same target model under the
+original sampled graph, the full graph, and a no-edge setting.
+
+The released scripts train target GNNs, run membership-inference attacks, and
+generate the main result plots. The included data consists of the saved
+train-test graph splits used by the experiments, including the postprocessed
+Chameleon graph with self-loops removed and edges made undirected. Together,
+the code and data support the paper's central finding: graph structure directly
+shapes membership-inference risk, and the train-test generalization gap is an
+incomplete proxy for that risk because membership advantage can change
+independently of the generalization gap.
+
+### Security/Privacy Issues and Ethical Concerns 
+
+This artifact does not introduce any known security risk to the evaluator's
+machine. It does not disable any operating-system, network, or software security
+mechanism, and it does not run any unsafe code. The artifact consists of scripts for training graph neural networks, running membership-inference evaluations, and
+generating plots.
+
+The experiments use public benchmark graph data and saved train-test splits.
+They do not include user-study data, private personal data, anonymized
+transcripts, survey responses, or other human-subjects data. Therefore, no
+additional ethical-review or IRB process was required for releasing the
+artifact. The privacy analysis is limited to measuring membership-inference
+risk in this public-data experimental setting.
+
+## Basic Requirements 
+
+For both sections below, if you are giving reviewers remote access to special
+hardware (e.g., Intel SGX v2.0) or proprietary software (e.g., Matlab R2025a)
+for the purpose of the artifact evaluation, do not provide these instructions
+here but rather in the corresponding submission field on HotCRP.
+
+### Hardware Requirements 
+
+Can run on a laptop (No special hardware requirements). 
+
+
+### Software Requirements 
+
+The artifact is implemented in Python and is intended to run in a Conda
+environment. It does not require a VM, Docker container, proprietary software,
+or special operating-system packages beyond a standard Python/Conda setup.
+
+The experiments were run with the environment specified in `environment.yml`.
+The required software is:
+
+1.  The artifact is not tied to a specific operating-system  as long as the conda environment can be set-up.
+2. Environment manager: Conda 
+3. Programming language: Python 3.10.
+4. All required Python packages are listed in environment.yml file
+
+No pretrained machine-learning model is required. The artifact trains the GNN
+target models and membership-inference attack models from scratch during the
+experiments. The required graph data and saved train-test splits are included
+under `data/`
 
 ## Installation
 
@@ -30,7 +91,7 @@ data/cora/snowball_3_0.1/split_1.pt
 data/cora/random_0.5/split_1.pt
 ```
 
-Note that the Chameleon base graph is pre-processed to remove self-loops and make the graph undirected. The processed graph is stored at `data/chameleon` and is used to construct train-test splits. The corresponding split files are stored under `data/chameleon1/`.
+Note that the Chameleon base graph is postprocessed to remove self-loops and make the graph undirected. The processed graph is stored at `data/chameleon`, and the corresponding split files are stored under `data/chameleon1/`.
 
 Snowball split directories include the max-neighbor setting in the folder name:
 
