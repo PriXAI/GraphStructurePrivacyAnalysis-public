@@ -304,7 +304,7 @@ several hours.
 
 This artifact supports the following main claims from the paper:
 
-1. The training graph constructiion has an effect on performance gap of the models which in turn affects the membership inference risk. Specifically, snowball sampling strategy to construct training graph often hurts generalization relative to random sampling due to its coverage bias.
+1. The training graph construction has an effect on performance gap of the models which in turn affects the membership inference risk. Specifically, snowball sampling strategy to construct training graph often hurts generalization relative to random sampling due to its coverage bias.
 2. Inference-time edge access affects both target-model performance and
    membership-inference risk. The artifact evaluates each trained target model
    under the original sampled graph, the full graph, and a no-edge setting.
