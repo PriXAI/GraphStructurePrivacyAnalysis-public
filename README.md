@@ -402,9 +402,7 @@ workstation.
 
 Small numerical
 differences may occur across machines and software backends even with fixed
-random seeds. The expected qualitative trends should remain stable: graph
-construction and edge access affect membership advantage, and membership
-advantage need not track the train-test generalization gap exactly.
+random seeds. The expected qualitative trends should remain stable.
 
 The artifact includes the saved train-test splits used by the experiments. It
 does not attempt to reproduce every possible random split or every possible
