@@ -124,6 +124,8 @@ and whether PyTorch Geometric datasets have already been cached.
 | One full experiment setting | 2-5 min | ~10-20 min estimated | <1 MB |
 | Full main-result reproduction | 30-60 min | ~8-12 hours estimated | <10 MB outputs |
 
+The 8-12 hour of full reulst reproduction estimate assumes that Cora, PubMed, and Chameleon experiments are run in parallel as separate server jobs.
+
 ## Installation
 
 Clone the artifact repository, then create and activate the project
