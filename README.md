@@ -3,6 +3,8 @@ Paper title: **Impact of Graph Structure on Membership-Inference Risk for Graph 
 
 Requested Badge(s):
   - [X] **Available**
+  - [X] **Functional**
+  - [X] **Reproduced**
 
 
 
@@ -28,6 +30,18 @@ shapes membership-inference risk, and the train-test generalization gap is an
 incomplete proxy for that risk because membership advantage can change
 independently of the generalization gap.
 
+### Accessibility
+
+The artifact is available through the following persistent GitHub repository:
+
+https://github.com/PriXAI/GraphStructurePrivacyAnalysis-public/tree/main
+
+This repository contains the source code, experiment scripts, environment specification, saved train-test graph splits, and README instructions needed to reproduce the artifact. The artifact should be evaluated from the latest commit on the `main` branch during the review process. After artifact evaluation is finalized, we will provide the artifact chairs with a stable reference, such as a specific commit ID, for archival listing.
+
+### License 
+
+The source code in this artifact is released under the MIT License. Included datasets remain subject to their original licenses.
+
 ### Security/Privacy Issues and Ethical Concerns 
 
 This artifact does not introduce any known security risk to the evaluator's
@@ -47,7 +61,16 @@ risk in this public-data experimental setting.
 
 ### Hardware Requirements 
 
-Can run on a laptop (No special hardware requirements). 
+No special hardware is required. A standard laptop is sufficient for installing
+the environment, running the smoke test, and executing a small one-split
+functional check.
+
+For full reproduction of all main experiments, we recommend using a server. The experiments are CPU-compatible and do not require a GPU,
+but the full experiment matrix trains multiple target GNNs and
+membership-inference attack models across datasets, models, train ratios,
+sampling strategies, splits, and attack-test sizes. Running the full
+reproduction on a server reduces wall-clock time and avoids interrupting
+long-running jobs on a personal laptop.
 
 
 ### Software Requirements 
@@ -59,7 +82,7 @@ or special operating-system packages beyond a standard Python/Conda setup.
 The experiments were run with the environment specified in `environment.yml`.
 The required software is:
 
-1.  The artifact is not tied to a specific operating-system  as long as the conda environment can be set-up.
+1. Operating system: Linux or macOS with Conda available. The artifact is not tied to a specific operating-system version. We believe that it can be easily run on other OS too but we have not tested that.
 2. Environment manager: Conda 
 3. Programming language: Python 3.10.
 4. All required Python packages are listed in environment.yml file
@@ -69,14 +92,123 @@ target models and membership-inference attack models from scratch during the
 experiments. The required graph data and saved train-test splits are included
 under `data/`
 
+### Estimated Time and Storage Consumption
+
+The repository checkout requires approximately 1.6 GB of disk space, of which
+approximately 1.5 GB is the bundled graph data and saved train-test splits. The
+Conda environment requires approximately 1 GB of additional disk space. The CSV
+and plot outputs are small, typically below 10 MB. We recommend reserving at
+least 5 GB of disk space to allow for the repository, Conda environment, package
+caches, PyTorch Geometric cache files, and temporary files.
+
+The expected human effort is approximately 20-30 minutes for cloning the
+repository, creating the Conda environment, running the smoke test, and checking
+the functional output. Full reproduction requires approximately 30-60 minutes of
+human effort to launch the experiment scripts and compare the generated CSV
+files and plots with the paper results.
+
+On our local machine, the environment smoke test completed in 8.79 seconds, and
+a one-split Cora functional check completed in 42.24 seconds. A full five-split
+experiment setting with four attack-test sizes is expected to take
+approximately 10-20 minutes, depending on the dataset and model. Reproducing
+the full set of main result CSVs may take approximately 8-12 compute-hours on a
+standard laptop or CPU workstation. Runtime may vary with CPU, memory, BLAS,
+and whether PyTorch Geometric datasets have already been cached.
+
+| Task | Human time | Compute time | Storage |
+|---|---:|---:|---:|
+| Clone repository | 2-5 min | 1-5 min | 1.6 GB |
+| Create Conda environment | 5-10 min | 5-20 min | ~1 GB |
+| Environment smoke test | 1-2 min | ~9 sec measured | negligible |
+| One-split functional check | 2-5 min | ~42 sec measured | <1 MB |
+| One full experiment setting | 2-5 min | ~10-20 min estimated | <1 MB |
+| Full main-result reproduction | 30-60 min | ~8-12 hours estimated | <10 MB outputs |
+
 ## Installation
 
-Create and activate the project environment:
+Clone the artifact repository, then create and activate the project
+environment:
 
 ```bash
+git clone https://github.com/PriXAI/GraphStructurePrivacyAnalysis-public.git
+cd GraphStructurePrivacyAnalysis-public
 conda env create -f environment.yml
 conda activate graph-structure-privacy-analysis
 ```
+
+The `conda env create` command installs Python 3.10 and the Python packages
+listed in `environment.yml`, including PyTorch, PyTorch Geometric, NumPy,
+Pandas, scikit-learn, NetworkX, Matplotlib, and Seaborn. No further
+installation step is needed. The experiment scripts should be run from the root
+of the cloned repository so that relative paths such as
+`data/cora/snowball_3_0.1/split_1.pt` resolve correctly.
+
+## Testing the Environment
+
+After activating the Conda environment, run the following smoke test from the
+repository root:
+
+```bash
+python - <<'PY'
+import torch
+import torch_geometric
+import numpy
+import pandas
+import sklearn
+import networkx
+
+from models.model import GNNModel
+from utils.data_utils import load_dataset
+
+cora = load_dataset("cora")
+split = torch.load("data/cora/snowball_3_0.1/split_1.pt")
+
+assert cora.x.shape[0] > 0
+assert split.train_mask.sum().item() > 0
+assert split.test_mask.sum().item() > 0
+
+print("Environment OK")
+print(f"Cora nodes: {cora.x.shape[0]}")
+print(f"Split train nodes: {split.train_mask.sum().item()}")
+print(f"Split test nodes: {split.test_mask.sum().item()}")
+PY
+```
+
+The expected output is:
+
+```text
+Environment OK
+Cora nodes: 2708
+Split train nodes: 270
+Split test nodes: 2438
+```
+
+Minor differences in package-warning messages are acceptable. If this command
+prints `Environment OK`, the core dependencies can be imported and the bundled
+graph split can be loaded. The first call to `load_dataset("cora")` may download
+the public PyTorch Geometric Planetoid Cora cache if it is not already present.
+
+As a short functional check, run one Cora split:
+
+```bash
+python main.py \
+  --dataset_name cora \
+  --model_type GCN \
+  --train_ratio 0.1 \
+  --num_splits 1 \
+  --max_neighbors 3 \
+  --random_seed 42 \
+  --strategy snowball \
+  --input_path data/cora/snowball_3_0.1 \
+  --output_path results/environment_check_cora.csv \
+  --attack_test_size 0.2
+```
+
+This command trains one target GNN on one saved Cora split, evaluates the model
+under the original-graph, full-graph, and no-edge settings, runs the
+membership-inference attack for one attack-test-size setting, and writes
+`results/environment_check_cora.csv`. Successful completion confirms that the
+training, evaluation, attack, and CSV-output pipeline is functioning.
 
 ## Data
 The inductive train-test splits are created using the two sampling strategies and saved as PyTorch Geometric split objects under `data/`. The experiment scripts expect one split file per split, for example:
@@ -128,7 +260,8 @@ The model implementation is in `models/model.py`. The main experiment orchestrat
 
 ## Running Experiments
 
-Example run for Cora with train graph constructed using snowball sampling:
+Example full five-split run for Cora with train graph constructed using
+snowball sampling:
 
 ```bash
 python main.py \
@@ -147,6 +280,42 @@ python main.py \
 
 
 The script trains one target GNN per split, evaluates it under the three graph-access settings, and reruns the attack model for each requested `attack_test_size`.
+
+For the full experiment matrix, use `runner-general.py`:
+
+```bash
+python runner-general.py
+```
+
+This runner evaluates Cora, PubMed, and Chameleon for the configured target
+models, train ratios, sampling strategies, saved splits, and attack-test sizes.
+It writes dataset-specific CSV files under `results/`, for example:
+
+```text
+results/graph_structure_privacy_results_cora.csv
+results/graph_structure_privacy_results_pubmed.csv
+results/graph_structure_privacy_results_chameleon.csv
+```
+
+Full reproduction is best run on a server or workstation because it may take
+several hours.
+
+## Main Results and Claims
+
+This artifact supports the following main claims from the paper:
+
+1. The training graph constructiion has an effect on performance gap of the models which in turn affects the membership inference risk. Specifically, snowball sampling strategy to construct training graph often hurts generalization relative to random sampling due to its coverage bias.
+2. Inference-time edge access affects both target-model performance and
+   membership-inference risk. The artifact evaluates each trained target model
+   under the original sampled graph, the full graph, and a no-edge setting.
+3. The train-test generalization gap is an incomplete proxy for
+   membership-inference risk. The generated CSVs and plots show that membership
+   advantage can change independently of the generalization gap.
+
+The CSV columns `gen_gap_orig`, `gen_gap_alledges`, and `gen_gap_noedges`
+measure the performance gap when the edges from the original split, all edges of the graph and none of the edges were used respectively during inference. The columns `ma_orig`, `ma_transductive`, and
+`ma_nograph` measure membership advantage for the corresponding edge-access
+settings.
 
 ## Result CSVs
 
@@ -214,3 +383,43 @@ results/graph_structure_privacy_results_pubmed.csv
 ```
 
 You can pass explicit CSVs with `--csv`:
+
+```bash
+python utils/plot_3panel_attack_test_sizes.py \
+  --sampling snowball \
+  --csv results/graph_structure_privacy_results_cora.csv \
+        results/graph_structure_privacy_results_chameleon.csv \
+        results/graph_structure_privacy_results_pubmed.csv \
+  --output plots/three_panel_perf_vs_adv_attack_test_sizes_snowball.png
+```
+
+## Limitations
+
+The artifact trains target models and attack models from scratch rather than
+shipping pretrained checkpoints. This keeps the artifact self-contained, but it
+means full reproduction takes several hours and is better run on a server or
+workstation.
+
+Small numerical
+differences may occur across machines and software backends even with fixed
+random seeds. The expected qualitative trends should remain stable: graph
+construction and edge access affect membership advantage, and membership
+advantage need not track the train-test generalization gap exactly.
+
+The artifact includes the saved train-test splits used by the experiments. It
+does not attempt to reproduce every possible random split or every possible
+hyperparameter setting beyond the experiment matrix described above.
+
+## Notes on Reusability
+
+The code can be reused to evaluate additional graph datasets, GNN architectures,
+sampling strategies, and membership-inference attacks. The main extension
+points are:
+
+- `models/model.py` for target GNN architectures.
+- `attacks/` for membership-inference attacks.
+- `utils/data_utils.py` for dataset loading and split generation.
+- `runner-general.py` for configuring experiment batches.
+
+New saved splits can be generated with `create_and_save_splits_joint` and then
+passed to `main.py` using the `--input_path` argument.
