@@ -326,9 +326,16 @@ generalization gap.
 
 #### Main Experiment to Reproduce All Results
 
-To reproduce the claims supported by the artifact, run the one-dataset
-experiment runner separately for each dataset. We recommend launching the three
-dataset runs as parallel server jobs:
+To reproduce the claims supported by the artifact in one sequential run, use
+the general runner:
+
+```bash
+python runner-general.py
+```
+
+This command runs all configured datasets one after another. For faster full
+reproduction, run the one-dataset experiment runner separately for each dataset.
+We recommend launching the three dataset runs as parallel server jobs:
 
 ```bash
 python runner-one-dataset.py cora
