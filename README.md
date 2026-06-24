@@ -45,8 +45,8 @@ storage. For PubMed jobs we requested 4 GB of memory; all other jobs we requeste
 
 The artifact is implemented in Python and is intended to run in a Conda
 environment. It does not require a VM, Docker container, proprietary software,
-or special operating-system packages beyond a standard Python/Conda setup. The
-artifact was tested on Linux and macOS with Conda. The full experiments were run on x86_64 Linux CPU nodes on the Delft AI Cluster.
+or special operating-system packages beyond a standard Python/Conda setup. The artifact was tested on Linux and macOS with Conda. The full experiments
+were run on x86_64 Red Hat Enterprise Linux 7 CPU nodes on the Delft AI Cluster. No GPU was required.
 
 The experiments were run with the environment specified in `environment.yml`.
 The required software is:
