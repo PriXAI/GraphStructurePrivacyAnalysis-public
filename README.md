@@ -233,9 +233,7 @@ The mounted `results/` and `plots/` directories ensure that generated CSV files
 and figures are written back to the host machine. Once inside this Docker
 shell, run the same commands as in the Conda setup.
 
-The `-it` flags start an interactive terminal in the container. There is no
-need to edit the Dockerfile or delete its `CMD` entry before starting an
-interactive Docker session. The Docker image makes the
+The `-it` flags start an interactive terminal in the container. The Docker image makes the
 `graph-structure-privacy-analysis` Conda environment the default environment,
 so commands such as `./test.sh`, `./check.sh`, and `python runner-general.py`
 are the same for both setup options.
