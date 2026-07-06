@@ -1,4 +1,4 @@
-# Artifact Appendix (Required for all badges)
+# Artifact Appendix
 
 Paper title: **Impact of Graph Structure on Membership-Inference Risk for Graph Neural Networks**
 
@@ -7,20 +7,20 @@ Requested Badge(s):
   - [X] **Functional**
   - [X] **Reproduced**
 
-## Description (Required for all badges)
+## Description
 This artifact accompanies the PETS 2026 paper Impact of Graph Structure on Membership-Inference Risk for Graph Neural Networks by Megha Khosla. It contains the code and data needed to reproduce the paper's graph neural network membership-inference experiments.
 
 The artifact studies how graph structure affects node-level membership privacy in GNNs. In particular, it evaluates two structural factors: how the training graph is constructed and what edge information is available at inference time. For training-graph construction, the artifact compares snowball sampling, a structure-aware procedure, with uniform random node sampling. For inference-time edge access, it evaluates the same target model under the original sampled graph, the full graph, and a no-edge setting.
 
 The released scripts train target GNNs, run membership-inference attacks, and generate the main result plots. The included data consists of the saved train-test graph splits used by the experiments, including the postprocessed Chameleon graph with self-loops removed and edges made undirected. Together, the code and data support the paper's central finding: graph structure directly shapes membership-inference risk, and the train-test generalization gap is an incomplete proxy for that risk because membership advantage can change independently of the generalization gap.
 
-### Security/Privacy Issues and Ethical Concerns (Required for all badges)
+### Security/Privacy Issues and Ethical Concerns
 
 This artifact does not introduce any known security risk to the evaluator's machine. It does not disable any operating-system, network, or software security mechanism, and it does not run any unsafe code. The artifact consists of scripts for training graph neural networks, running membership-inference evaluations, and generating plots.
 
 The experiments use public benchmark graph data and saved train-test splits. They do not include user-study data, private personal data, anonymized transcripts, survey responses, or other human-subjects data. Therefore, no additional ethical-review was required for releasing the artifact. The privacy analysis is limited to measuring membership-inference risk in this public-data experimental setting.
 
-## Basic Requirements (Required for Functional and Reproduced badges)
+## Basic Requirements
 
 ### Hardware Requirements
 
@@ -41,7 +41,7 @@ which the recorded jobs ran had 1 x AMD EPYC 7502P 32-Core Processor, 32
 physical cores, a 2.5 GHz clock, 251 GB of RAM, and 148 GB of local temporary
 storage. For PubMed jobs we requested 4 GB of memory; all other jobs we requested 1 GB.
 
-### Software Requirements (Required for Functional and Reproduced badges)
+### Software Requirements
 
 The artifact supports two setup options.
 
@@ -119,7 +119,7 @@ Available target GNN model types:
 The model implementation is in `models/model.py`. The main experiment orchestration is in `main.py`.
 
 
-### Estimated Time and Storage Consumption (Required for Functional and Reproduced badges)
+### Estimated Time and Storage Consumption
 
 The repository checkout requires approximately 1.6 GB of disk space, of which
 approximately 1.5 GB is the bundled graph data and saved train-test splits. The
@@ -148,14 +148,14 @@ commands are lightweight: each plot typically takes seconds to a few minutes,
 and all main plots should take less than 10 human-minutes to launch and inspect.
 
 
-## Environment (Required for all badges)
+## Environment
 
 The artifact is distributed as a Git repository. All source code, the Conda
 environment specification, and the saved graph train-test split files required
 by the experiments are included in the repository. No separate download,
 pretrained model, VM image, Docker image, or proprietary software is required.
 
-### Accessibility (Required for all badges)
+### Accessibility
 
 The artifact is available through the following persistent GitHub repository:
 
@@ -183,7 +183,7 @@ Included datasets and saved graph splits remain subject to their original
 dataset terms. See [THIRD_PARTY_DATASETS.md](THIRD_PARTY_DATASETS.md) for
 dataset provenance, upstream license/terms notes, and citation guidance.
 
-### Set Up the Environment (Required for Functional and Reproduced badges)
+### Set Up the Environment
 
 Clone the artifact repository first:
 
@@ -240,7 +240,7 @@ interactive Docker session. The Docker image makes the
 so commands such as `./test.sh`, `./check.sh`, and `python runner-general.py`
 are the same for both setup options.
 
-### Testing the Environment (Required for Functional and Reproduced badges)
+### Testing the Environment
 After activating the Conda environment, or after entering the Docker shell, run
 the smoke test from the repository root:
 
@@ -275,7 +275,7 @@ training, evaluation, attack, and CSV-output pipeline is functioning.
 
 
 
-## Artifact Evaluation (Required for Functional and Reproduced badges)
+## Artifact Evaluation
 
 ### Main Results and Claims
 
