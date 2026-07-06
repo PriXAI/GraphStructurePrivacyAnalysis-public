@@ -43,13 +43,14 @@ storage. For PubMed jobs we requested 4 GB of memory; all other jobs we requeste
 
 ### Software Requirements (Required for Functional and Reproduced badges)
 
-The artifact is implemented in Python and is intended to run in a Conda
-environment. It does not require a VM, Docker container, proprietary software,
-or special operating-system packages beyond a standard Python/Conda setup. The artifact was tested on Linux and macOS with Conda. The full experiments
-were run on x86_64 Red Hat Enterprise Linux 7 CPU nodes on the Delft AI Cluster. No GPU was required.
+The artifact supports two setup options.
 
-The experiments were run with the environment specified in `environment.yml`.
-The required software is:
+**Option 1: Conda setup.** Run the artifact directly on the host operating
+system using Conda. The artifact was tested on Linux and macOS with Conda. The
+full experiments were run on x86_64 Red Hat Enterprise Linux 7 CPU nodes on the
+Delft AI Cluster. No GPU was required.
+
+Required software for the Conda setup:
 
 1. Operating system: Linux or macOS with Conda available. The artifact is not
    tied to a specific operating-system version. It may also run on other
@@ -57,6 +58,12 @@ The required software is:
 2. Environment manager: Conda.
 3. Programming language: Python 3.10.
 4. All required Python packages are listed in the `environment.yml` file.
+
+**Option 2: Docker setup.** Build and run the provided Docker image. In this
+case, Docker is the only host-level requirement; Python 3.10, Conda, PyTorch,
+PyTorch Geometric, NumPy, Pandas, scikit-learn, NetworkX, Matplotlib, and
+Seaborn are installed automatically when the image is built from the
+`Dockerfile`.
 
 No pretrained machine-learning model is required. The artifact trains the GNN
 target models and membership-inference attack models from scratch during the
@@ -159,8 +166,11 @@ This repository contains the source code, experiment scripts, environment specif
 The repository contains:
 
 - `environment.yml`: the Conda environment specification.
+- `Dockerfile`: optional Docker setup.
 - `main.py`: the main experiment runner.
 - `runner-*.py`: convenience scripts for selected experiment batches.
+- `test.sh`, `check.sh`, `plot_gap.sh`, and `plot_adv.sh`: short helper
+  scripts for testing and plotting.
 - `attacks/`, `models/`, `training/`, and `utils/`: implementation modules.
 - `data/`: saved graph splits for Cora, PubMed, and Chameleon, plus the
   processed Chameleon graph used by the experiments.
@@ -173,14 +183,23 @@ Included datasets and saved graph splits remain subject to their original
 dataset terms. See [THIRD_PARTY_DATASETS.md](THIRD_PARTY_DATASETS.md) for
 dataset provenance, upstream license/terms notes, and citation guidance.
 
-### Set up the environment (Required for Functional and Reproduced badges)
+### Set Up the Environment (Required for Functional and Reproduced badges)
 
-Install Conda if it is not already available. Then clone the
-artifact repository and create the project environment:
+Clone the artifact repository first:
 
 ```bash
 git clone https://github.com/PriXAI/GraphStructurePrivacyAnalysis-public.git
 cd GraphStructurePrivacyAnalysis-public
+```
+
+Then choose either the Conda setup or the Docker setup.
+
+#### Option 1: Conda Setup
+
+Install Conda if it is not already available. Then create and activate the
+project environment:
+
+```bash
 conda env create -f environment.yml
 conda activate graph-structure-privacy-analysis
 ```
@@ -193,35 +212,40 @@ No further installation step is needed. The experiment scripts should be run
 from the root of the cloned repository so that relative paths such as
 `data/cora/snowball_3_0.1/split_1.pt` resolve correctly.
 
-### Testing the Environment (Required for Functional and Reproduced badges)
+#### Option 2: Docker Setup
 
-After activating the Conda environment, run the following smoke test from the
-repository root:
+Build the Docker image from the repository root:
 
 ```bash
-python - <<'PY'
-import torch
-import torch_geometric
-import numpy
-import pandas
-import sklearn
-import networkx
+docker build -t graph-structure-privacy-analysis .
+```
 
-from models.model import GNNModel
-from utils.data_utils import load_dataset
+Then start an interactive shell inside the Docker environment:
 
-cora = load_dataset("cora")
-split = torch.load("data/cora/snowball_3_0.1/split_1.pt")
+```bash
+docker run --rm -it \
+  -v "$PWD/results:/artifact/results" \
+  -v "$PWD/plots:/artifact/plots" \
+  graph-structure-privacy-analysis
+```
 
-assert cora.x.shape[0] > 0
-assert split.train_mask.sum().item() > 0
-assert split.test_mask.sum().item() > 0
+The mounted `results/` and `plots/` directories ensure that generated CSV files
+and figures are written back to the host machine. Once inside this Docker
+shell, run the same commands as in the Conda setup.
 
-print("Environment OK")
-print(f"Cora nodes: {cora.x.shape[0]}")
-print(f"Split train nodes: {split.train_mask.sum().item()}")
-print(f"Split test nodes: {split.test_mask.sum().item()}")
-PY
+The `-it` flags start an interactive terminal in the container. There is no
+need to edit the Dockerfile or delete its `CMD` entry before starting an
+interactive Docker session. The Docker image makes the
+`graph-structure-privacy-analysis` Conda environment the default environment,
+so commands such as `./test.sh`, `./check.sh`, and `python runner-general.py`
+are the same for both setup options.
+
+### Testing the Environment (Required for Functional and Reproduced badges)
+After activating the Conda environment, or after entering the Docker shell, run
+the smoke test from the repository root:
+
+```bash
+./test.sh
 ```
 
 The expected output is:
@@ -235,72 +259,19 @@ Split test nodes: 2438
 
 Minor differences in package-warning messages are acceptable. If this command
 prints `Environment OK`, the core dependencies can be imported and the bundled
-graph data can be loaded. 
+graph data can be loaded. The first run may download the public PyTorch
+Geometric Planetoid Cora cache if it is not already present.
 
 As an optional functional check, run a short one-split experiment:
 
 ```bash
-python main.py \
-  --dataset_name cora \
-  --model_type GCN \
-  --train_ratio 0.1 \
-  --num_splits 1 \
-  --max_neighbors 3 \
-  --random_seed 42 \
-  --strategy snowball \
-  --input_path data/cora/snowball_3_0.1 \
-  --output_path results/environment_check_cora.csv \
-  --attack_test_size 0.2
+./check.sh
 ```
 
 This command trains one target GNN on one saved Cora split, runs the
 membership-inference attack for one attack-test-size setting, and writes
 `results/environment_check_cora.csv`. Successful completion confirms that the
 training, evaluation, attack, and CSV-output pipeline is functioning.
-
-### Docker Environment (Optional)
-
-The primary supported setup is the Conda environment above. The artifact also
-includes a `Dockerfile` for reviewers who prefer to build an isolated Docker
-environment. Build the image from the repository root:
-
-```bash
-docker build -t graph-structure-privacy-analysis .
-```
-
-To smoke-test the Docker image without running a full experiment, run:
-
-```bash
-docker run --rm graph-structure-privacy-analysis \
-  conda run --no-capture-output -n graph-structure-privacy-analysis \
-  python -c "import torch, torch_geometric, pandas, sklearn, networkx; split=torch.load('data/cora/snowball_3_0.1/split_1.pt'); print('Docker smoke test OK'); print('train nodes:', split.train_mask.sum().item()); print('test nodes:', split.test_mask.sum().item())"
-```
-
-To run the one-split functional check inside Docker and write the output CSV to
-the host `results/` directory, run:
-
-```bash
-docker run --rm \
-  -v "$PWD/results:/artifact/results" \
-  graph-structure-privacy-analysis \
-  conda run --no-capture-output -n graph-structure-privacy-analysis \
-  python main.py \
-    --dataset_name cora \
-    --model_type GCN \
-    --train_ratio 0.1 \
-    --num_splits 1 \
-    --max_neighbors 3 \
-    --random_seed 42 \
-    --strategy snowball \
-    --input_path data/cora/snowball_3_0.1 \
-    --output_path results/docker_environment_check_cora.csv \
-    --attack_test_size 0.2
-```
-
-The Docker image was smoke-tested by importing the core dependencies and
-loading the bundled Cora split. On an Apple Silicon machine, Docker built a
-`linux/aarch64` image; on a typical x86_64 server, Docker will build a
-`linux/amd64` image.
 
 
 
@@ -356,7 +327,8 @@ results/graph_structure_privacy_results_chameleon.csv
 
 ##### Result CSVs
 
-Main experiment outputs are CSV files under the 'output_path' provided while running the main experiment. 
+Main experiment outputs are CSV files under the `output_path` provided while
+running the main experiment.
 
 Each row in the results file corresponds to one dataset/model/train-ratio/sampling-strategy/attack-test-size setting. Values aggregated across splits are stored as `mean \pm std`.
 
@@ -371,52 +343,20 @@ Important columns:
 - `ma_orig`, `ma_transductive`, `ma_nograph`: membership advantage for original-split, full-graph, and no-edge access.
 
 
-Docker commands for the main experiment are given below. First build the image
-as described in the Docker setup section. Then, to reproduce all results with
-one dataset per container, launch the following commands. The `results/`
-directory is mounted so that the generated CSV files are written back to the
-host:
-
-```bash
-docker run --rm -v "$PWD/results:/artifact/results" graph-structure-privacy-analysis \
-  conda run --no-capture-output -n graph-structure-privacy-analysis \
-  python runner-one-dataset.py cora
-
-docker run --rm -v "$PWD/results:/artifact/results" graph-structure-privacy-analysis \
-  conda run --no-capture-output -n graph-structure-privacy-analysis \
-  python runner-one-dataset.py pubmed
-
-docker run --rm -v "$PWD/results:/artifact/results" graph-structure-privacy-analysis \
-  conda run --no-capture-output -n graph-structure-privacy-analysis \
-  python runner-one-dataset.py chameleon
-```
-
-These three Docker commands can be run in parallel on a suitable server. To run
-all experiments sequentially inside one Docker container instead, use:
-
-```bash
-docker run --rm \
-  -v "$PWD/results:/artifact/results" \
-  graph-structure-privacy-analysis \
-  conda run --no-capture-output -n graph-structure-privacy-analysis \
-  python runner-general.py
-```
+If using Docker, first enter the interactive Docker shell described in
+[Option 2: Docker Setup](#option-2-docker-setup), then run the same commands
+shown above. The mounted `results/` directory will receive the generated CSV
+files.
 
 
 
 #### Sub-Experiment/ Result 1: Effect of train graph construction strategy on Performance Gap
 
-Use `utils/plot_gengap_sampling_strategy.py` to compare random and snowball
-sampling for one dataset while holding `Use_Loss`, attack test size, and the
-max-neighbor setting fixed.
+Use `plot_gap.sh` to compare random and snowball sampling for one dataset while
+holding `Use_Loss`, attack test size, and the max-neighbor setting fixed.
 
 ```bash
-python utils/plot_gengap_sampling_strategy.py \
-  --csv results/graph_structure_privacy_results_cora.csv \
-  --dataset cora \
-  --attack_test_size 0.2 \
-  --max_neighbors 3 \
-  --output plots/cora_gengap_sampling_strategy.png
+./plot_gap.sh cora
 ```
 
 This command reads the Cora result CSV and generates a plot comparing the
@@ -425,46 +365,40 @@ train-test generalization gap for snowball sampling and random sampling. The
 does not affect the target-model performance gap. Therefore, any available
 attack-test size in the CSV, such as `0.9`, `0.8`, `0.5`, or `0.2`, can be used
 for this plot. This plot corresponds to Figure 4 in the paper. To reproduce
-Figures 5 and 6, replace the dataset name with `pubmed` and `chameleon`,
-respectively. After the result CSVs are available, each of these plotting
-commands is expected to take only seconds to a few minutes.
+Figures 5 and 6, run `./plot_gap.sh pubmed` and `./plot_gap.sh chameleon`,
+respectively. Internally, this helper script calls
+`utils/plot_gengap_sampling_strategy.py`. After the result CSVs are available,
+each of these plotting commands is expected to take only seconds to a few
+minutes.
 
 #### Sub-Experiment/ Result 2: Effect of Performance Gap on Membership Advantage
 
-Use `utils/plot_3panel_attack_test_sizes.py` to plot train-test performance gap
-against membership advantage across datasets, graph-access settings, models,
-train ratios, and attack-test sizes. This sub-experiment supports the claim
-that membership advantage does not always monotonically increase with the
-train-test performance gap.
+Use `plot_adv.sh` to plot train-test performance gap against membership
+advantage across datasets, graph-access settings, models, train ratios, and
+attack-test sizes. This sub-experiment supports the claim that membership
+advantage does not always monotonically increase with the train-test
+performance gap.
 
 Snowball sampling:
 
 ```bash
-python utils/plot_3panel_attack_test_sizes.py \
-  --sampling snowball \
-  --csv results/graph_structure_privacy_results_cora.csv \
-        results/graph_structure_privacy_results_chameleon.csv \
-        results/graph_structure_privacy_results_pubmed.csv \
-  --output plots/three_panel_perf_vs_adv_attack_test_sizes_snowball.png
+./plot_adv.sh snowball
 ```
 
 Random sampling:
 
 ```bash
-python utils/plot_3panel_attack_test_sizes.py \
-  --sampling random \
-  --csv results/graph_structure_privacy_results_cora.csv \
-        results/graph_structure_privacy_results_chameleon.csv \
-        results/graph_structure_privacy_results_pubmed.csv \
-  --output plots/three_panel_perf_vs_adv_attack_test_sizes_random.png
+./plot_adv.sh random
 ```
 
 Each command reads the generated result CSV files and creates a multi-panel
 plot. The x-axis shows the train-test performance gap, and the y-axis shows
 membership advantage. Points are grouped by dataset, attack-test size, and
 inference-time graph-access setting: original sampled graph, full graph, and
-no-edge access. The two plots correspond to Figures 7 and 8 in the paper. After the result CSVs are available, each plotting command is
-expected to take only seconds to a few minutes.
+no-edge access. The two plots correspond to Figures 7 and 8 in the paper.
+Internally, this helper script calls `utils/plot_3panel_attack_test_sizes.py`.
+After the result CSVs are available, each plotting command is expected to take
+only seconds to a few minutes.
 
 
 

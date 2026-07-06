@@ -1,0 +1,10 @@
+.git
+__pycache__
+*.pyc
+.ipynb_checkpoints
+slurm_*.out
+slurm_*.err
+plots/*.png
+plots/*.pdf
+plots/*.svg
+results/environment_check_cora.csv
