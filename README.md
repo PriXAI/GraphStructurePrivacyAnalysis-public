@@ -357,13 +357,13 @@ holding `Use_Loss`, attack test size, and the max-neighbor setting fixed.
 ./plot_gap.sh cora
 ```
 
-This command reads the Cora result CSV and generates a plot comparing the
+The above script reads the Cora result CSV and generates a plot comparing the
 train-test generalization gap for snowball sampling and random sampling. The
 `attack_test_size` argument is used only to select rows from the result CSV; it
 does not affect the target-model performance gap. Therefore, any available
 attack-test size in the CSV, such as `0.9`, `0.8`, `0.5`, or `0.2`, can be used
 for this plot. This plot corresponds to Figure 4 in the paper. To reproduce
-Figures 5 and 6, run `./plot_gap.sh pubmed` and `./plot_gap.sh chameleon`,
+Figures 5 and 6, run `./plot_gap.sh chameleon` and `./plot_gap.sh pubmed`,
 respectively. Internally, this helper script calls
 `utils/plot_gengap_sampling_strategy.py`. After the result CSVs are available,
 each of these plotting commands is expected to take only seconds to a few
